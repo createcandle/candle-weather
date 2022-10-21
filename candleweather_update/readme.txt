@@ -14,7 +14,7 @@ python3 extract_city_names.py > for_json.txt
 use that for_json file in manifest.json
 
 
-The same thing for extract_lookup_table.py, which generates a python dictionary
+The same thing for extract_lookup_table.py, which generates a python dictionary that can be used in util.py
 
 
 
