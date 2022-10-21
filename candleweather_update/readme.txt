@@ -1,3 +1,6 @@
+Manifest.json and the python util script have long lists of city names. The scripts in this folder help create that code.
+
+
 First, grab the latest list of city names to city numbers
 
 https://worldweather.wmo.int/en/dataguide.html
