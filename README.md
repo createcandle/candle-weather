@@ -1,6 +1,6 @@
 # candle-weather
-A simple weather prediction addon that uses data from the WMO.
+A simple weather prediction addon that uses data from the World Meteorological Organization.
 
-More details:
+Learn more:
 
 https://www.candlesmarthome.com
