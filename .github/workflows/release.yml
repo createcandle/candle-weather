@@ -14,6 +14,10 @@ jobs:
       uses: bruceadams/get-release@v1.2.2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Make build script executable
+      run: chmod +x ./build.sh
+    - name: Make packaging script executable
+      run: chmod +x ./package.sh
     - name: Package project
       run: |
         ./build.sh linux-arm python 3.9
