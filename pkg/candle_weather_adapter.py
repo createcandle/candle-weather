@@ -321,13 +321,13 @@ class CandleWeatherAdapter(Adapter):
                         if self.metric == False:
                             current_temp = round((current_temp * 1.8) + 32 ,1) # convert to Fahrenheit
                         
-                        targetProperty = self.thing.find_property('current_temperature')
+                        targetProperty = self.thing.find_property('temperature')
                         if targetProperty == None:
                             if self.DEBUG:
                                 print("-Today's current temperature property did not exist yet. Creating it now.")
-                            self.thing.properties["current_temperature"] = CandleWeatherProperty(
+                            self.thing.properties["temperature"] = CandleWeatherProperty(
                                             self.thing,
-                                            "current_temperature",
+                                            "temperature",
                                             {
                                                 "@type": "TemperatureProperty",
                                                 "label": "Temperature",
@@ -340,7 +340,7 @@ class CandleWeatherAdapter(Adapter):
 
                             self.handle_device_added(self.thing)
 
-                            targetProperty = self.thing.find_property('current_temperature')
+                            targetProperty = self.thing.find_property('temperature')
             
                         targetProperty.update(current_temp)
                             
@@ -436,14 +436,14 @@ class CandleWeatherAdapter(Adapter):
                         if days_list[0]['weather'] != "":
                             today_weather = days_list[1]['weather']
         
-                        # tomorrows weather
-                        targetProperty = self.tomorrow_thing.find_property('weather')
+                        # today's weather
+                        targetProperty = self.thing.find_property('description')
                         if targetProperty == None:
                             if self.DEBUG:
                                 print("-today's weather property did not exist yet. Creating it now.")
-                            self.thing.properties["weather"] = CandleWeatherProperty(
+                            self.thing.properties["description"] = CandleWeatherProperty(
                                             self.thing,
-                                            "weather",
+                                            "description",
                                             {
                                                 "label": "Weather today",
                                                 'type': 'string',
@@ -452,15 +452,17 @@ class CandleWeatherAdapter(Adapter):
                                             today_weather)
 
                             self.handle_device_added(self.thing)
-                            targetProperty = self.thing.find_property('weather')
+                            targetProperty = self.thing.find_property('description')
         
                         targetProperty.update(today_weather)
 
 
 
 
-
                         if len(prediction_data['city']['forecast']['forecastDay']) > 1:
+                            
+                            
+                            # TOMORROW
                             
                             # tomorrow prediction
                             tomorrow_weather_string = days_list[1]['weather']
@@ -473,9 +475,6 @@ class CandleWeatherAdapter(Adapter):
         
                             #tomorrow_added = tomorrow_minimum_temperature + tomorrow_maximum_temperature
                             #tomorrow_median_temperature = round( tomorrow_added * 2 ) / 2
-        
-                            # TOMORROW
-                            
                             
                             tomorrow_weather = "..."
                             if days_list[1]['weather'] != "":
