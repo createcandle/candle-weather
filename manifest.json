@@ -3496,7 +3496,7 @@
           "type": "boolean"
         },
         "Debugging": {
-          "description": "Advanced. Debugging allows you to diagnose any issues with the add-on. If enabled it will result in a lot more debug data in the internal log (which can be found under settings -> developer -> view internal logs).",
+          "description": "Advanced. Debugging allows you to diagnose any issues with the add-on. If enabled it will result in a lot more debug data in the internal log.",
           "type": "boolean"
         }
       },
@@ -3507,5 +3507,5 @@
     }
   },
   "short_name": "candleweather",
-  "version": "0.0.5"
+  "version": "0.0.6"
 }
