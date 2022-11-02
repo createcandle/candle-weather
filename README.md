@@ -10,6 +10,14 @@ The second thing shows a prediction for tomorrow:
 
 ![Alt text](screenshot.png?raw=true "Screenshot")
 
+
+## Integrations
+
+VoCo voice control has some optimizations for this addon. If you ask for todays values it will skip the sunrise and sunset values.
+
+The photoframe addon will detect this addon's thing an use it to show the current weather on the screensaver.
+
+
 Learn more about Candle:
 
 https://www.candlesmarthome.com
