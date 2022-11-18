@@ -42,6 +42,7 @@ cd -
 # Make the tarball
 echo "creating archive"
 TARFILE="candle-weather-${version}${TARFILE_SUFFIX}.tgz"
+echo "TARFILE: $TARFILE"
 tar czf ${TARFILE} package
 
 echo "creating shasums"
