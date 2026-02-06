@@ -3508,7 +3508,7 @@
     }
   },
   "short_name": "candleweather",
-  "version": "0.0.14",
+  "version": "0.1.0",
   "web_accessible_resources": [
     "images/*.svg"
   ]
