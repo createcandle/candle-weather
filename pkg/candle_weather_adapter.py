@@ -35,12 +35,12 @@ class CandleWeatherAdapter(Adapter):
 
         verbose -- whether or not to enable verbose logging
         """
-        print("Initialising CandleWeather")
+        print("candle weather debug: Initialising CandleWeather")
         self.pairing = False
         self.name = self.__class__.__name__
         self.addon_name = 'candle-weather'
         Adapter.__init__(self, 'candle-weather', 'candle-weather', verbose=verbose)
-        #print("Adapter ID = " + self.get_id())
+        #print("candle weather debug: Adapter ID = " + self.get_id())
 
         self.addon_path = os.path.join(self.user_profile['addonsDir'], self.addon_name)
 
@@ -54,16 +54,16 @@ class CandleWeatherAdapter(Adapter):
         self.temperature_unit = 'degree celsius'
         
         self.nearest_city = "Netherlands - Amsterdam (Schiphol)"
-        self.nearest_city_code = 144 # De Bilt, NL
+        self.nearest_city_code = 143 # Schiphol, NL
         
         try:
             self.add_from_config()
         except Exception as ex:
-            print("Error loading config: " + str(ex))
+            print("candle weather debug: Error loading config: " + str(ex))
 
         self.nearest_city_code = get_city_code(self.nearest_city)
         if self.DEBUG:
-            print("self.nearest_city_code: " + str(self.nearest_city_code))
+            print("candle weather debug: self.nearest_city_code: " + str(self.nearest_city_code))
             
         
         try:
@@ -73,16 +73,9 @@ class CandleWeatherAdapter(Adapter):
             self.devices['candle-weather-today'].connected_notify(True)
             self.thing = self.get_device("candle-weather-today")
         except Exception as ex:
-            print("Error creating thing: " + str(ex))
+            print("candle weather debug: Error creating thing: " + str(ex))
             
-        try:
-            candle_tomorrow_device = CandleTomorrowDevice(self)
-            self.handle_device_added(candle_tomorrow_device)
-            self.devices['candle-weather-tomorrow'].connected = True
-            self.devices['candle-weather-tomorrow'].connected_notify(True)
-            self.tomorrow_thing = self.get_device("candle-weather-tomorrow")
-        except Exception as ex:
-            print("Error creating thing: " + str(ex))
+        self.tomorrow_thing = None
 
 
         # test
@@ -92,14 +85,14 @@ class CandleWeatherAdapter(Adapter):
             if hour_counter == 0 or hour_counter > self.interval:
                 hour_counter = 0
                 if self.DEBUG:
-                    print("grabbing fresh weather data")
+                    print("candle weather debug: grabbing fresh weather data")
                 self.download_data(self.nearest_city_code)
             
             hour_counter += 1
             time.sleep(1)
 
         if self.DEBUG:
-            print("End of CandleWeatherAdapter init process")
+            print("candle weather debug: End of CandleWeatherAdapter init process")
         
 
 
@@ -119,7 +112,7 @@ class CandleWeatherAdapter(Adapter):
                     
                     if int(current_data['present'][x]['cityId']) == int(city_code):
                         if self.DEBUG:
-                            print("Found the city: " + str(current_data['present'][x]))
+                            print("candle weather debug: Found the city: " + str(current_data['present'][x]))
                 
                         city_dict = current_data['present'][x]
                 
@@ -134,14 +127,35 @@ class CandleWeatherAdapter(Adapter):
                         """
                 
                 
+                        # Location
+                        targetProperty = self.thing.find_property('location')
+                        if targetProperty == None:
+                            if self.DEBUG:
+                                print("candle weather debug: -Location property did not exist yet. Creating it now.")
+                            self.thing.properties["location"] = CandleWeatherProperty(
+                                            self.thing,
+                                            "location",
+                                            {
+                                                "label": "Location",
+                                                'type': 'string',
+                                                'readOnly': True,
+                                            },
+                                            str(self.nearest_city))
+                            
+                            self.handle_device_added(self.thing)
+                            targetProperty = self.thing.find_property('location')
+
+                        targetProperty.update(str(self.nearest_city))
+                
+                
                         # todays weather description
                         targetProperty = self.thing.find_property('current_description')
                         if targetProperty == None:
                             if self.DEBUG:
-                                print("-Today's current description property did not exist yet. Creating it now.")
+                                print("candle weather debug: -Today's current description property did not exist yet. Creating it now.")
                             self.thing.properties["current_description"] = CandleWeatherProperty(
                                             self.thing,
-                                            "current_direction",
+                                            "current_description",
                                             {
                                                 "label": "Description",
                                                 'type': 'string',
@@ -159,7 +173,7 @@ class CandleWeatherAdapter(Adapter):
                         targetProperty = self.thing.find_property('current_humidity')
                         if targetProperty == None:
                             if self.DEBUG:
-                                print("-Today's current humidity property did not exist yet. Creating it now.")
+                                print("candle weather debug: -Today's current humidity property did not exist yet. Creating it now.")
                             self.thing.properties["current_humidity"] = CandleWeatherProperty(
                                             self.thing,
                                             "current_humidity",
@@ -182,7 +196,7 @@ class CandleWeatherAdapter(Adapter):
                         targetProperty = self.thing.find_property('current_wind_direction')
                         if targetProperty == None:
                             if self.DEBUG:
-                                print("-Today's current wind direction property did not exist yet. Creating it now.")
+                                print("candle weather debug: -Today's current wind direction property did not exist yet. Creating it now.")
                             self.thing.properties["current_wind_direction"] = CandleWeatherProperty(
                                             self.thing,
                                             "current_wind_direction",
@@ -203,7 +217,7 @@ class CandleWeatherAdapter(Adapter):
                         targetProperty = self.thing.find_property('current_wind_speed')
                         if targetProperty == None:
                             if self.DEBUG:
-                                print("-Today's current wind_speed property did not exist yet. Creating it now.")
+                                print("candle weather debug: -Today's current wind_speed property did not exist yet. Creating it now.")
                             self.thing.properties["current_wind_speed"] = CandleWeatherProperty(
                                             self.thing,
                                             "current_wind_speed",
@@ -229,7 +243,7 @@ class CandleWeatherAdapter(Adapter):
                                 targetProperty = self.thing.find_property('current_sunrise_hour')
                                 if targetProperty == None:
                                     if self.DEBUG:
-                                        print("-Today's current sunrise hour property did not exist yet. Creating it now.")
+                                        print("candle weather debug: -Today's current sunrise hour property did not exist yet. Creating it now.")
                                     self.thing.properties["current_sunrise_hour"] = CandleWeatherProperty(
                                                     self.thing,
                                                     "current_sunrise_hour",
@@ -250,7 +264,7 @@ class CandleWeatherAdapter(Adapter):
                                 targetProperty = self.thing.find_property('current_sunrise_minute')
                                 if targetProperty == None:
                                     if self.DEBUG:
-                                        print("-Today's current sunrise minute property did not exist yet. Creating it now.")
+                                        print("candle weather debug: -Today's current sunrise minute property did not exist yet. Creating it now.")
                                     self.thing.properties["current_sunrise_minute"] = CandleWeatherProperty(
                                                     self.thing,
                                                     "current_sunrise_minute",
@@ -276,7 +290,7 @@ class CandleWeatherAdapter(Adapter):
                                 targetProperty = self.thing.find_property('current_sunset_hour')
                                 if targetProperty == None:
                                     if self.DEBUG:
-                                        print("-Today's current sunset hour property did not exist yet. Creating it now.")
+                                        print("candle weather debug: -Today's current sunset hour property did not exist yet. Creating it now.")
                                     self.thing.properties["current_sunset_hour"] = CandleWeatherProperty(
                                                     self.thing,
                                                     "current_sunset_hour",
@@ -297,7 +311,7 @@ class CandleWeatherAdapter(Adapter):
                                 targetProperty = self.thing.find_property('current_sunset_minute')
                                 if targetProperty == None:
                                     if self.DEBUG:
-                                        print("-Today's current sunset minute property did not exist yet. Creating it now.")
+                                        print("candle weather debug: -Today's current sunset minute property did not exist yet. Creating it now.")
                                     self.thing.properties["current_sunset_minute"] = CandleWeatherProperty(
                                                     self.thing,
                                                     "current_sunset_minute",
@@ -324,7 +338,7 @@ class CandleWeatherAdapter(Adapter):
                         targetProperty = self.thing.find_property('temperature')
                         if targetProperty == None:
                             if self.DEBUG:
-                                print("-Today's current temperature property did not exist yet. Creating it now.")
+                                print("candle weather debug: -Today's current temperature property did not exist yet. Creating it now.")
                             self.thing.properties["temperature"] = CandleWeatherProperty(
                                             self.thing,
                                             "temperature",
@@ -348,10 +362,10 @@ class CandleWeatherAdapter(Adapter):
         
                 else:
                     if self.DEBUG:
-                        print("\nno cityId in city: " + str(city_dict))
+                        print("candle weather debug: \nno cityId in city: " + str(city_dict))
         else:
             if self.DEBUG:
-                print("Error, 'present' was not found in current weather data")
+                print("candle weather debug: Error, 'present' was not found in current weather data")
         
         
         
@@ -363,14 +377,21 @@ class CandleWeatherAdapter(Adapter):
         text = data.decode('utf-8') # a `str`; this step can't be used if data is binary
         prediction_data = json.loads(text)
         if self.DEBUG:
-            print("DOWNLOADED PREDICION JSON: " + str(prediction_data))
+            print("candle weather debug: DOWNLOADED PREDICTION JSON: " + str(prediction_data))
 
         if 'city' in prediction_data:
+            
             if 'forecast' in prediction_data['city']:
+                
                 if 'forecastDay' in prediction_data['city']['forecast']:
+                    
                     if len(prediction_data['city']['forecast']['forecastDay']) > 0:
-
+                        
+                        
+                        
                         days_list = prediction_data['city']['forecast']['forecastDay']
+                        if self.DEBUG:
+                            print("candle weather debug: prediction days available: " + str(len(days_list)))
         
                         # today prediction
                         today_weather_string = days_list[0]['weather']
@@ -390,7 +411,7 @@ class CandleWeatherAdapter(Adapter):
                         targetProperty = self.thing.find_property('minimum_temperature')
                         if targetProperty == None:
                             if self.DEBUG:
-                                print("-today's minimum property did not exist yet. Creating it now.")
+                                print("candle weather debug: -today's minimum property did not exist yet. Creating it now.")
                             self.thing.properties["minimum_temperature"] = CandleWeatherProperty(
                                             self.thing,
                                             "minimum_temperature",
@@ -413,7 +434,7 @@ class CandleWeatherAdapter(Adapter):
                         targetProperty = self.thing.find_property('maximum_temperature')
                         if targetProperty == None:
                             if self.DEBUG:
-                                print("-today's maximum property did not exist yet. Creating it now.")
+                                print("candle weather debug: -today's maximum property did not exist yet. Creating it now.")
                             self.thing.properties["maximum_temperature"] = CandleWeatherProperty(
                                             self.thing,
                                             "maximum_temperature",
@@ -440,7 +461,7 @@ class CandleWeatherAdapter(Adapter):
                         targetProperty = self.thing.find_property('description')
                         if targetProperty == None:
                             if self.DEBUG:
-                                print("-today's weather property did not exist yet. Creating it now.")
+                                print("candle weather debug: -today's weather property did not exist yet. Creating it now.")
                             self.thing.properties["description"] = CandleWeatherProperty(
                                             self.thing,
                                             "description",
@@ -457,110 +478,155 @@ class CandleWeatherAdapter(Adapter):
                         targetProperty.update(today_weather)
 
 
-
+                        #print("candle weather debug: predicted days: " + str(len(prediction_data['city']['forecast']['forecastDay'])))
 
                         if len(prediction_data['city']['forecast']['forecastDay']) > 1:
                             
                             
-                            # TOMORROW
-                            
-                            # tomorrow prediction
-                            tomorrow_weather_string = days_list[1]['weather']
-                            tomorrow_minimum_temperature = float(days_list[1]['minTemp'])
-                            tomorrow_maximum_temperature = float(days_list[1]['maxTemp'])
-                            
-                            if self.metric == False:
-                                tomorrow_minimum_temperature = float(days_list[1]['minTempF'])
-                                tomorrow_maximum_temperature = float(days_list[1]['maxTempF'])
-        
-                            #tomorrow_added = tomorrow_minimum_temperature + tomorrow_maximum_temperature
-                            #tomorrow_median_temperature = round( tomorrow_added * 2 ) / 2
-                            
-                            tomorrow_weather = "..."
-                            if days_list[1]['weather'] != "":
-                                tomorrow_weather = days_list[1]['weather']
-            
-                            # tomorrows weather
-                            targetProperty = self.tomorrow_thing.find_property('weather')
-                            if targetProperty == None:
+                            try:
+                                if self.tomorrow_thing == None:
+                                    candle_tomorrow_device = CandleTomorrowDevice(self)
+                                    self.handle_device_added(candle_tomorrow_device)
+                                    self.devices['candle-weather-tomorrow'].connected = True
+                                    self.devices['candle-weather-tomorrow'].connected_notify(True)
+                                    self.tomorrow_thing = self.get_device("candle-weather-tomorrow")
+                            except Exception as ex:
                                 if self.DEBUG:
-                                    print("-tomorrow's weather property did not exist yet. Creating it now.")
-                                self.tomorrow_thing.properties["weather"] = CandleWeatherProperty(
-                                                self.tomorrow_thing,
-                                                "weather",
-                                                {
-                                                    "label": "Weather tomorrow",
-                                                    'type': 'string',
-                                                    'readOnly': True
-                                                },
-                                                tomorrow_weather)
+                                    print("candle weather debug: Error creating tomorrow thing: " + str(ex))
+                            
+                            if self.tomorrow_thing:
+                                
+                                # Tomorrow Location
+                                targetProperty = self.tomorrow_thing.find_property('location')
+                                if targetProperty == None:
+                                    if self.DEBUG:
+                                        print("candle weather debug: -Location property did not exist yet. Creating it now.")
+                                    self.tomorrow_thing.properties["location"] = CandleWeatherProperty(
+                                                    self.tomorrow_thing,
+                                                    "location",
+                                                    {
+                                                        "label": "Location",
+                                                        'type': 'string',
+                                                        'readOnly': True,
+                                                    },
+                                                    str(self.nearest_city))
+                            
+                                    self.handle_device_added(self.tomorrow_thing)
+                                    targetProperty = self.tomorrow_thing.find_property('location')
 
-                                self.handle_device_added(self.tomorrow_thing)
+                                targetProperty.update(str(self.nearest_city))
+                            
+                                # TOMORROW
+                            
+                                # tomorrow prediction
+                                tomorrow_weather_string = days_list[1]['weather']
+                                tomorrow_minimum_temperature = float(days_list[1]['minTemp'])
+                                tomorrow_maximum_temperature = float(days_list[1]['maxTemp'])
+                            
+                                if self.metric == False:
+                                    tomorrow_minimum_temperature = float(days_list[1]['minTempF'])
+                                    tomorrow_maximum_temperature = float(days_list[1]['maxTempF'])
+        
+                                #tomorrow_added = tomorrow_minimum_temperature + tomorrow_maximum_temperature
+                                #tomorrow_median_temperature = round( tomorrow_added * 2 ) / 2
+                            
+                                tomorrow_weather = "..."
+                                if days_list[1]['weather'] != "":
+                                    tomorrow_weather = days_list[1]['weather']
+            
+                                # tomorrows weather
                                 targetProperty = self.tomorrow_thing.find_property('weather')
+                                if targetProperty == None:
+                                    if self.DEBUG:
+                                        print("candle weather debug: -tomorrow's weather property did not exist yet. Creating it now.")
+                                    self.tomorrow_thing.properties["weather"] = CandleWeatherProperty(
+                                                    self.tomorrow_thing,
+                                                    "weather",
+                                                    {
+                                                        "label": "Weather tomorrow",
+                                                        'type': 'string',
+                                                        'readOnly': True
+                                                    },
+                                                    tomorrow_weather)
+
+                                    self.handle_device_added(self.tomorrow_thing)
+                                    targetProperty = self.tomorrow_thing.find_property('weather')
             
-                            targetProperty.update(tomorrow_weather)
+                                targetProperty.update(tomorrow_weather)
                             
             
-                            # tomorrows minimum temperature
-                            targetProperty = self.tomorrow_thing.find_property('minimum_temperature')
-                            if targetProperty == None:
-                                if self.DEBUG:
-                                    print("-tomorrow's minimum temperature property did not exist yet. Creating it now.")
-                                self.tomorrow_thing.properties["minimum_temperature"] = CandleWeatherProperty(
-                                                self.tomorrow_thing,
-                                                "minimum_temperature",
-                                                {
-                                                    "label": "Minimum temperature",
-                                                    'type': 'number',
-                                                    'unit': self.temperature_unit,
-                                                    'readOnly': True,
-                                                    'multipleOf':0.1,
-                                                },
-                                                tomorrow_minimum_temperature)
-
-                                self.handle_device_added(self.tomorrow_thing)
+                                # tomorrows minimum temperature
                                 targetProperty = self.tomorrow_thing.find_property('minimum_temperature')
-            
-                            targetProperty.update(tomorrow_minimum_temperature)
-        
-        
-                            # tomorrows maximum temperature
-                            targetProperty = self.tomorrow_thing.find_property('maximum_temperature')
-                            if targetProperty == None:
-                                if self.DEBUG:
-                                    print("-tomorrow's maximum temperature property did not exist yet. Creating it now.")
-                                self.tomorrow_thing.properties["maximum_temperature"] = CandleWeatherProperty(
-                                                self.tomorrow_thing,
-                                                "maximum_temperature",
-                                                {
-                                                    "@type": "TemperatureProperty",
-                                                    "label": "Maximum temperature",
-                                                    'type': 'number',
-                                                    'unit': self.temperature_unit,
-                                                    'readOnly': True,
-                                                    'multipleOf':0.1,
-                                                },
-                                                tomorrow_maximum_temperature)
-                                                
-                                self.handle_device_added(self.tomorrow_thing)
-                                targetProperty = self.tomorrow_thing.find_property('maximum_temperature')
-            
-                            targetProperty.update(tomorrow_maximum_temperature)
+                                if targetProperty == None:
+                                    if self.DEBUG:
+                                        print("candle weather debug: -tomorrow's minimum temperature property did not exist yet. Creating it now.")
+                                    self.tomorrow_thing.properties["minimum_temperature"] = CandleWeatherProperty(
+                                                    self.tomorrow_thing,
+                                                    "minimum_temperature",
+                                                    {
+                                                        "label": "Minimum temperature",
+                                                        'type': 'number',
+                                                        'unit': self.temperature_unit,
+                                                        'readOnly': True,
+                                                        'multipleOf':0.1,
+                                                    },
+                                                    tomorrow_minimum_temperature)
 
+                                    self.handle_device_added(self.tomorrow_thing)
+                                    targetProperty = self.tomorrow_thing.find_property('minimum_temperature')
+            
+                                targetProperty.update(tomorrow_minimum_temperature)
+        
+        
+                                # tomorrows maximum temperature
+                                targetProperty = self.tomorrow_thing.find_property('maximum_temperature')
+                                if targetProperty == None:
+                                    if self.DEBUG:
+                                        print("candle weather debug: -tomorrow's maximum temperature property did not exist yet. Creating it now.")
+                                    self.tomorrow_thing.properties["maximum_temperature"] = CandleWeatherProperty(
+                                                    self.tomorrow_thing,
+                                                    "maximum_temperature",
+                                                    {
+                                                        "@type": "TemperatureProperty",
+                                                        "label": "Maximum temperature",
+                                                        'type': 'number',
+                                                        'unit': self.temperature_unit,
+                                                        'readOnly': True,
+                                                        'multipleOf':0.1,
+                                                    },
+                                                    tomorrow_maximum_temperature)
+                                                
+                                    self.handle_device_added(self.tomorrow_thing)
+                                    targetProperty = self.tomorrow_thing.find_property('maximum_temperature')
+            
+                                targetProperty.update(tomorrow_maximum_temperature)
+                                
+                            else:
+                                if self.DEBUG:
+                                    print("candle weather debug: \nError, tomorrow_thing failed to be created?")
+                                    
+                        else:
+                            if self.DEBUG:
+                                print("candle weather debug: \nNo prediction data for tomorrow available")
+                            
+                    else:
+                        if self.DEBUG:
+                            print("candle weather debug: \nWarning, forecast list was empty: " + str(prediction_data))
             
                 else:
                     if self.DEBUG:
-                        print("\nError, forecast list missing: " + str(prediction_data))
+                        print("candle weather debug: \nError, forecast list missing: " + str(prediction_data))
             
             else:
                 if self.DEBUG:
-                    print("\nError, forecast data missing: " + str(prediction_data))
+                    print("candle weather debug: \nError, forecast data missing: " + str(prediction_data))
+                    
         else:
             if self.DEBUG:
-                print("'nError, city key missing in prediction data: " + str(prediction_data))
+                print("candle weather debug: 'nError, city key missing in prediction data: " + str(prediction_data))
         
         if self.DEBUG:
-            print("Weather update should be complete")
+            print("candle weather debug: Weather update should be complete")
         
         
                 
@@ -568,23 +634,23 @@ class CandleWeatherAdapter(Adapter):
         
 
     def unload(self):
-        print("Shutting down CandleWeather")
+        print("candle weather debug: Shutting down CandleWeather")
         self.running = False
         
 
 
     def remove_thing(self, device_id):
         if self.DEBUG:
-            print("-----REMOVING:" + str(device_id))
+            print("candle weather debug: -----REMOVING:" + str(device_id))
         
         try:
             obj = self.get_device(device_id)        
             self.handle_device_removed(obj)  # Remove from device dictionary
             if self.DEBUG:
-                print("Removed device")
+                print("candle weather debug: Removed device")
         except:
             if self.DEBUG:
-                print("Could not remove things from devices")
+                print("candle weather debug: Could not remove things from devices")
         
         return
 
@@ -600,7 +666,7 @@ class CandleWeatherAdapter(Adapter):
             config = database.load_config()
             database.close()
         except:
-            print("Error! Failed to open settings database.")
+            print("candle weather debug: Error! Failed to open settings database.")
             return
 
         if not config:
@@ -613,11 +679,11 @@ class CandleWeatherAdapter(Adapter):
             if 'Debugging' in config:
                 self.DEBUG = bool(config['Debugging'])
                 if self.DEBUG:
-                    print("Debugging is set to: " + str(self.DEBUG))
+                    print("candle weather debug: Debugging is set to: " + str(self.DEBUG))
             else:
                 self.DEBUG = False
         except:
-            print("Error loading debugging preference")
+            print("candle weather: Error loading debugging preference")
             
         
         # Nearest city from dropdown
@@ -625,14 +691,14 @@ class CandleWeatherAdapter(Adapter):
             if 'Nearest city' in config:
                 self.nearest_city = str(config['Nearest city'])
                 if self.DEBUG:
-                    print("selected nearest city: " + str(self.nearest_city))
+                    print("candle weather debug: selected nearest city: " + str(self.nearest_city))
             else:
                 if self.DEBUG:
-                    print("Nearest city preference not found in settings")
+                    print("candle weather debug: Nearest city preference not found in settings")
                 
         except Exception as ex:
             if self.DEBUG:
-                print("Error with nearest city selection: " + str(ex))
+                print("candle weather: Error with nearest city selection: " + str(ex))
             
         
         # Metric or Imperial
@@ -643,10 +709,10 @@ class CandleWeatherAdapter(Adapter):
                     self.temperature_unit = 'degree fahrenheit'
             else:
                 if self.DEBUG:
-                    print("metric preference was not in config")
+                    print("candle weather debug: metric preference was not in config")
         except Exception as ex:
             if self.DEBUG:
-                print("Metric/Fahrenheit preference not found error: " + str(ex))
+                print("candle weather debug: Metric/Fahrenheit preference not found error: " + str(ex))
         
         
         # update frequency
@@ -655,10 +721,10 @@ class CandleWeatherAdapter(Adapter):
                 self.interval = 3600 * int(config['Update frequency'])
             else:
                 if self.DEBUG:
-                    print("Update prequency preference not found")
+                    print("candle weather debug: Update prequency preference not found")
         except Exception as ex:
             if self.DEBUG:
-                print("Update prequency preference not found error: " + str(ex))
+                print("candle weather debug: Update prequency preference not found error: " + str(ex))
 
 
 #
@@ -676,7 +742,7 @@ class CandleWeatherDevice(Device):
 
         
         Device.__init__(self, adapter, 'candle-weather-today')
-        #print("Creating CandleWeather thing")
+        #print("candle weather debug: Creating CandleWeather thing")
         
         self._id = 'candle-weather-today'
         self.id = 'candle-weather-today'
@@ -689,7 +755,7 @@ class CandleWeatherDevice(Device):
 
 
         if self.adapter.DEBUG: 
-            print("Empty CandleWeather today thing has been created.")
+            print("candle weather debug: Empty CandleWeather today thing has been created.")
 
 
 
@@ -705,7 +771,7 @@ class CandleTomorrowDevice(Device):
 
         
         Device.__init__(self, adapter, 'candle-weather-tomorrow')
-        #print("Creating CandleWeather thing")
+        #print("candle weather debug: Creating CandleWeather thing")
         
         self._id = 'candle-weather-tomorrow'
         self.id = 'candle-weather-tomorrow'
@@ -718,7 +784,7 @@ class CandleTomorrowDevice(Device):
 
 
         if self.adapter.DEBUG: 
-            print("Empty CandleWeather tomorrow thing has been created.")
+            print("candle weather debug: Empty CandleWeather tomorrow thing has been created.")
 
 
 
@@ -732,7 +798,7 @@ class CandleWeatherProperty(Property):
 
     def __init__(self, device, name, description, value):
         
-        #print("incoming thing device at property init is: " + str(device))
+        #print("candle weather debug: incoming thing device at property init is: " + str(device))
         Property.__init__(self, device, name, description)
         
         
@@ -746,7 +812,7 @@ class CandleWeatherProperty(Property):
 
 
     def set_value(self, value):
-        #print("set_value is called on a CandleWeather property by the UI. This should not be possible in this case?")
+        #print("candle weather debug: set_value is called on a CandleWeather property by the UI. This should not be possible in this case?")
         pass
 
 
@@ -754,11 +820,11 @@ class CandleWeatherProperty(Property):
         
         if value != self.value:
             if self.device.adapter.DEBUG: 
-                print("candle weather property: "  + str(self.title) + ", -> update to: " + str(value))
+                print("candle weather debug: candle weather property: "  + str(self.title) + ", -> update to: " + str(value))
             self.value = value
             self.set_cached_value(value)
             self.device.notify_property_changed(self)
         else:
             if self.device.adapter.DEBUG: 
-                print("candle weather property: "  + str(self.title) + ", was already this value: " + str(value))
+                print("candle weather debug: candle weather property: "  + str(self.title) + ", was already this value: " + str(value))
 

@@ -1,5 +1,6 @@
 {
   "author": "CandleSmartHome.com",
+  "content_scripts": [],
   "description": "Shows weather predictions. Uses data from World Meteorological Organization.",
   "gateway_specific_settings": {
     "webthings": {
@@ -3507,5 +3508,8 @@
     }
   },
   "short_name": "candleweather",
-  "version": "0.0.14"
+  "version": "0.0.14",
+  "web_accessible_resources": [
+    "images/*.svg"
+  ]
 }
